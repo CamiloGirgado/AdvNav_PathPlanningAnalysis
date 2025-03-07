@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import heapq
 import math
+import time
 from typing import Any, Tuple
 
 plt.ioff()
@@ -265,7 +266,6 @@ def neighbors_8():
 
 def get_neighbors(curr, grid):
     possible_neighbors = neighbors_8()
-    
     #possible_neighbors = neighbors_four()
     #possible_neighbors.reverse()
     neighbors = []
@@ -292,7 +292,6 @@ def extend(grid, nearest_neighbor, random_state, steps,goal):
     return new_state
 
 def get_nearest_neighbors(tree, node):
-    # Placeholder implementation for get_nearest_neighbors function
     min_distance = float('inf')
     nearest_node = None
     for key in tree:
@@ -408,8 +407,6 @@ def setup():
                 ]
         },
     }
-    
-    #algorithms = {}
     algorithms["RRT"] = {
         "algorithm": rrt,
         "stats": 
@@ -480,44 +477,40 @@ def plot_metrics(algos: dict,metric: str,xLabel,yLabel,title):
 
 def pathPlanningAnalysis():
     algos = setup()
-    import time
-    for algo in algos:
-        mapCount = len(algos[algo]["stats"])
+
+    for algo, data in algos.items():
+        map_stats = data["stats"]
+        map_count = len(map_stats)
+
+        # Read the first map to determine grid size
+        grid, start_goals = read_grid_from_file(map_stats[0]["map"])
+        goal_count = len(start_goals)
+
+        fig, axs = plt.subplots(map_count, goal_count)
         
-        grid, start_goals = read_grid_from_file(algos[list(algos.keys())[0]]["stats"][0]["map"])
-        goals = len(start_goals)
-        fig, axs = plt.subplots(mapCount, goals)
-        mapIndex = 0
-        
-        for stat in algos[algo]["stats"]:
+        for map_index, stat in enumerate(map_stats):
             print(f"Running {algo} on {stat['map']}")
-            grid, start_goals = read_grid_from_file(stat['map'])
-            grid_numerical = [[1 if cell == 'X' else 0 for cell in row] for row in grid]
-            grid_numerical = np.flipud(grid_numerical)
-            goalIndex = 0
-            for start,goal in start_goals:
+
+            # Load grid and convert to numerical representation
+            grid, start_goals = read_grid_from_file(stat["map"])
+            grid_numerical = np.flipud([[1 if cell == 'X' else 0 for cell in row] for row in grid])
+
+            for goal_index, (start, goal) in enumerate(start_goals):
                 start_time = time.time()
-                path, visited_states_count = run_algo(algos[algo]["algorithm"],start,goal,grid_numerical)
-                end_time = time.time()
-                execution_time = end_time - start_time
-                
-                if stat.get("path_length") is None:
-                    stat["path_length"] = []
-                stat["path_length"].append(len(path))
-                plot_grid(axs[mapIndex,goalIndex],grid_numerical,path,start,goal)    
-                
-                if stat.get("execution_times") is None:
-                    stat["execution_times"] = []
-                stat["execution_times"].append(execution_time)
-                
-                if stat.get("visited_states_count") is None:
-                    stat["visited_states_count"] = []
-                stat["visited_states_count"].append(visited_states_count)
-                
-                print(f"Execution Time: {execution_time} seconds")
+                path, visited_states_count = run_algo(data["algorithm"], start, goal, grid_numerical)
+                execution_time = time.time() - start_time
+
+                # Append stats
+                stat.setdefault("path_length", []).append(len(path))
+                stat.setdefault("execution_times", []).append(execution_time)
+                stat.setdefault("visited_states_count", []).append(visited_states_count)
+
+                # Plot results
+                plot_grid(axs[map_index, goal_index], grid_numerical, path, start, goal)
+
+                print(f"Execution Time: {execution_time:.4f} seconds")
                 print(f"Visited states count: {visited_states_count}")
-                goalIndex+=1
-            mapIndex+=1
+
         fig.suptitle(f"{algo}")
         plt.show()
 
