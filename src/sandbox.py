@@ -33,30 +33,26 @@ class PriorityQueue:
     def is_empty(self) -> bool:
         return not self.heap
 
-def read_grid_from_file(file_path):
-    grid = []
-    starts_goals=[]
-    lineNumber =0
-    with open(file_path, 'r') as file:
-        for line in file:
-            lineNumber+=1
-            if 2<lineNumber<6:
-                line_split = line.strip().split()
-                start = line_split[3]
-                start = ( int(start[1:-1].split(",")[1]), int(start[1:-1].split(",")[0]))
-                goal = line_split[6]
-                goal = ( int(goal[1:-1].split(",")[1]), int(goal[1:-1].split(",")[0]))
-                starts_goals.append([start,goal])
-            if lineNumber>5:
-                line_split = list(line.strip())
-                if len(line_split)==0:
-                    continue
-                # Strip the newline character and split by spaces
-                grid.append(line_split)
-    return grid,starts_goals
+def read_grid_from_file(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
 
-def readGrid():
-    # Example usage
+    # Read grid dimensions
+    rows, cols = map(int, lines[0].strip().split())
+
+    # Read start and goal coordinates
+    start_x, start_y = map(int, lines[1].strip().split())
+    goal_x, goal_y = map(int, lines[2].strip().split())
+    
+    start = (start_x, start_y)
+    goal = (goal_x, goal_y)
+
+    # Read the grid
+    grid = [list(line.strip()) for line in lines[3:rows + 3]]
+
+    return grid, start, goal
+
+def readGrid(): # Example usage
     file_path = './src/maps/map1.txt'
     grid, start_goals = read_grid_from_file(file_path)
 
@@ -65,7 +61,6 @@ def plot_grid(ax,grid, path=None, start=None, goal=None):
     cmap = plt.cm.get_cmap('Greys').copy()
     cmap.set_under(color='white') # Free space color
     cmap.set_over(color='black') # Obstacle color
-
     grid_array = np.asarray(grid)
     #fig, ax = plt.subplots()
 
@@ -84,7 +79,6 @@ def plot_grid(ax,grid, path=None, start=None, goal=None):
             end_y, end_x  = path[i + 1]
             ax.arrow(start_x, start_y, end_x - start_x, end_y - start_y,
                 head_width=0.3, head_length=0.3, fc='blue', ec='blue')
-            
         # Plot the last point in the path
         ax.plot(path[-1][1], path[-1][0], 'b.')
 
@@ -93,7 +87,8 @@ def plot_grid(ax,grid, path=None, start=None, goal=None):
             ax.plot(start[1], start[0], 'go') # Start point in green
         if goal:
             ax.plot(goal[1], goal[0], 'ro') # Goal point in red
-        #return fig
+        
+    #return fig
 
 def plotTest():
     # Example usage
@@ -109,11 +104,11 @@ def plotTest():
     ['.', 'X', '.', '.', '.', '.', 'X', '.', '.', '.'],
     ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.']
     ]
+
     # Convert grid to numerical values for plotting
     # Free space = 0, Obstacle = 1
     grid_numerical = [[1 if cell == 'X' else 0 for cell in row] for row in grid]
     grid_numerical = np.flipud(grid_numerical)
-
     # Define start and goal positions
     start = (0, 0)
     goal = (9, 9)
@@ -282,7 +277,6 @@ def get_neighbors(curr, grid):
     return neighbors
 
 def extend(grid, nearest_neighbor, random_state, steps,goal):
-    # Placeholder implementation for extend function
     new_state = nearest_neighbor
     stepCounter = 0
     while steps > stepCounter and new_state != random_state and new_state != goal:
@@ -292,7 +286,6 @@ def extend(grid, nearest_neighbor, random_state, steps,goal):
     return new_state
 
 def get_nearest_neighbors(tree, node):
-    # Placeholder implementation for get_nearest_neighbors function
     min_distance = float('inf')
     nearest_node = None
     for key in tree:
@@ -366,7 +359,7 @@ def setup():
                 ]
          
         },
-        
+
         "Dijkstras": {
             "algorithm": dijkstra,
             "stats": 
@@ -416,10 +409,12 @@ def setup():
             [
                 {
                 "map": "./src/maps/map1.txt",
-                },
+                }
+                ,
                 {
                 "map": "./src/maps/map2.txt",
-                },
+                }
+                ,
                 {
                 "map": "./src/maps/map3.txt",
                 }
@@ -547,3 +542,4 @@ if __name__ == "__main__":
     print("Press any key to exit")
     plt.ioff()
     plt.show()
+    
