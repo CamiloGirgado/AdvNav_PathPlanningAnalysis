@@ -478,17 +478,8 @@ def plot_metrics(algos: dict,metric: str,xLabel,yLabel,title):
         plt.legend()
         plt.show()
 
-def run_single_algo(map,algo):
-    grid, start_goals = read_grid_from_file(map)
-    grid_numerical = [[1 if cell == 'X' else 0 for cell in row] for row in grid]
-    grid_numerical = np.flipud(grid_numerical)
-    for start,goal in start_goals:
-        run_algo(algo,start,goal,grid_numerical)
-
 def pathPlanningAnalysis():
     algos = setup()
-    # Uncomment to run only one algorithm
-    # algos = {"BFS":algos.get("BFS")}
     import time
     for algo in algos:
         mapCount = len(algos[algo]["stats"])
