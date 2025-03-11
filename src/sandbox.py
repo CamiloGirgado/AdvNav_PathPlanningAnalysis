@@ -282,7 +282,6 @@ def get_neighbors(curr, grid):
     return neighbors
 
 def extend(grid, nearest_neighbor, random_state, steps,goal):
-    # Placeholder implementation for extend function
     new_state = nearest_neighbor
     stepCounter = 0
     while steps > stepCounter and new_state != random_state and new_state != goal:
@@ -466,7 +465,6 @@ def plot_metrics(algos: dict, metric: str, x_label: str, y_label: str, title: st
         ax.legend()
         
         plt.show()
-
 
 def pathPlanningAnalysis():
     algos = setup()
