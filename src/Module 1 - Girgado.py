@@ -211,10 +211,6 @@ def uniform_cost_search_v2(start, goal, grid_numerical):
 
 SQUARE_ROOT_2 = math.sqrt(2)
 def heuristic(node,goal):
-    # For 4 directions
-    # return abs(node[0]-goal[0])+abs(node[1]-goal[1])
-
-    # For 8 directions see: https://www.geeksforgeeks.org/a-search-algorithm/
     dx = abs(node[0]-goal[0])
     dy = abs(node[1]-goal[1])
     return (dx+dy)+ (SQUARE_ROOT_2-2)*min(dx,dy)
@@ -266,14 +262,11 @@ def neighbors_8():
 
 def get_neighbors(curr, grid):
     possible_neighbors = neighbors_8()
-    #possible_neighbors = neighbors_four()
-    #possible_neighbors.reverse()
     neighbors = []
     for pn in possible_neighbors:
         row = curr[0] + pn[0]
         col = curr[1] + pn[1]
         if 0 <= row < len(grid) and 0 <= col < len(grid[0]) and grid[row][col] == 0:
-            # Special logic for 8 directions for diagonal movement to avoid obstacles
             if pn[2]==1:
                 if grid[curr[0]+pn[0]][curr[1]]==0 and grid[curr[0]][curr[1]+pn[1]]==0:
                     neighbors.append((row, col))
@@ -405,8 +398,7 @@ def setup():
 
                 ]
         },
-    }
-    algorithms["RRT"] = {
+        "Uniform Cost Search": {
         "algorithm": rrt,
         "stats": 
             [
@@ -425,20 +417,12 @@ def setup():
                 }
 
             ]
+        }
     }
     return algorithms
 
 def run_algo(algorithm,start,goal,grid_numerical):
-    # grid, start_goals = read_grid_from_file(mapFile)
-    # grid_numerical = [[1 if cell == 'X' else 0 for cell in row] for row in grid]
-    # grid_numerical = np.flipud(grid_numerical)
-    # for start,goal in start_goals:
-    #     #start_flip = (len(grid_numerical)-1-start[0],start[1])
-    #     #goal_flip = (len(grid_numerical)-1-goal[0],goal[1])
-    # start_flip = start
-    # goal_flip = goal
     path,counter = algorithm(start,goal,grid_numerical)
-    #plot_grid(grid_numerical,path,start,goal)
     return path,counter
 
 def plot_metrics(algos: dict, metric: str, x_label: str, y_label: str, title: str):
